@@ -47,7 +47,7 @@ class ProductsController extends Controller
             ]
         );
         $requestedData = $request->all();
-
+        // dd($request->image);
         // dd($requestedData['image']);
         // $image1 = Image::make($request->file('image'));
         // $image1->resize(800, 800, function ($constraint) {
@@ -105,8 +105,8 @@ class ProductsController extends Controller
                 "image" => 'nullable'
             ]
         );
-        dd("---->request: ", $request->all());
-        // $product = Products::find($request->id);
+        // dd($request->all());
+        $product = Products::find($request->id);
         $requestedData = $request->all();
         // dd($request);
         if ($request->image !== null) {
@@ -117,7 +117,7 @@ class ProductsController extends Controller
             $request->file('image')->move(public_path('images'), $imageName);
             $requestedData['image'] = $imageName;
         } else {
-            dd("image Not received");
+            // dd("image Not received");
             $requestedData = $request->except('image');
         }
 

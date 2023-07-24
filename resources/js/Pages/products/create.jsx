@@ -18,9 +18,11 @@ function create() {
         const { name, value } = e.target;
         setData((prevData) => ({ ...prevData, [name]: value }));
     };
+
     const handleFileChange = (e) => {
         setData("image", e.target.files[0]);
     };
+    
     const handleSubmit = (e) => {
         e.preventDefault();
         post("/product", {
@@ -189,7 +191,7 @@ function create() {
                             type="file"
                             id="img"
                             name="image"
-                            // onChange={handleFileChange}
+                            onChange={handleFileChange}
                         />
                         {progress && (
                             <progress value={progress.percentage} max="100">

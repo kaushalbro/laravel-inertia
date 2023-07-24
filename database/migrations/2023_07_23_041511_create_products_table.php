@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('selling_price');
             $table->integer('total_stock');
             $table->integer('minimum_stock');
-            $table->string('image');
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }
