@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use Inertia\Inertia;
 use App\Models\Products;
 use Illuminate\Http\Request;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 class ProductsController extends Controller
 {
@@ -30,46 +34,26 @@ class ProductsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateProductRequest $request)
     {
-
         // protected $fillable =['name','description','brand','cost-price','selling-price','image','total-stock','minimum-stock'];
-        $request->validate(
-            [
-                "name" => "required|unique:products|max:255",
-                "description" => "required",
-                'brand' => 'required',
-                "cost_price" => 'required',
-                "selling_price" => 'required',
-                "minimum_stock" => 'required',
-                "total_stock" => 'required',
-                "image" => 'required|image|mimes:jpeg,png,jpg,gif,svg'
-            ]
-        );
         $requestedData = $request->all();
-        // dd($request->image);
-        // dd($requestedData['image']);
-        // $image1 = Image::make($request->file('image'));
-        // $image1->resize(800, 800, function ($constraint) {
-        //     $constraint->aspectRatio();
-        //     $constraint->upsize();
-        // });
-        // $imageName =  time() . '_' . $request->image->getClientOriginalName();
-        // $image1->save(public_path('images/' . $imageName));
-        // $requestedData['image'] = $imageName;
-
-
-        $imageName =  time() . '_' . $request->image->getClientOriginalName();
-        // $requestedData['image']->move(public_path('images/' . $imageName));
-        $request->file('image')->storeAs('public/images', $imageName);
-        //stores in /storage/app/public/iumages/
-        // dd($imageName);
-        $requestedData['image'] = $imageName;
-
-
-
+        $image = $request->file('image');
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            // dd($request->file('image'));
+            $newImage = Image::make($image)->resize(800, 800, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+            $imagePath =   $newImage->save(storage_path('/app/public/images/' . $imageName));
+            $imageURL = $imagePath ? Storage::url("images/" . $imageName) : null;
+            $requestedData['image'] = $imageURL;
+        }
         Products::create($requestedData);
-        return redirect("/product")->with('alert-success', 'Product created successfully.');
+
+        return redirect("/dashboard")->with('alert-success', 'Product created successfully.');
     }
     /**
      * Display the specified resource.
@@ -90,51 +74,39 @@ class ProductsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Products $product)
+    public function update(UpdateProductRequest $request, Products $product)
     {
-        // dd($request->all());
-        $request->validate(
-            [
-                "name" => "required|max:255",
-                "description" => "required",
-                'brand' => 'required',
-                "cost_price" => 'required',
-                "selling_price" => 'required',
-                "minimum_stock" => 'required',
-                "total_stock" => 'required',
-                "image" => 'nullable'
-            ]
-        );
-        // dd($request->all());
         $product = Products::find($request->id);
         $requestedData = $request->all();
-        // dd($request);
         if ($request->image !== null) {
-            // unlink(public_path('images/' . $product->image));
-            dd("image received");
-            unlink(base_path('/storage/app/public/images/' . $product->image));
-            $imageName =  time() . '_' . $request->image->getClientOriginalName();
-            $request->file('image')->move(public_path('images'), $imageName);
-            $requestedData['image'] = $imageName;
+            $image = $request->file('image');
+            @unlink(base_path("public/" . $product->image));
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $newImage = Image::make($image)->resize(800, 800, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+            $imagePath =   $newImage->save(storage_path('/app/public/images/' . $imageName));
+            $imageURL = $imagePath ? Storage::url("images/" . $imageName) : null;
+            $requestedData['image'] = $imageURL;
         } else {
-            // dd("image Not received");
             $requestedData = $request->except('image');
         }
-
-        // dd(gettype($request), $requestedData);
-
         $product->update($requestedData);
-        return redirect("/product")->with('alert-success', 'Product Updated Success fully successfully.');
+        return redirect("/dashboard")->with('alert-success', 'Product Updated Success fully successfully.');
     }
+
+
+
     public function destroy(Request $request)
     {
         $product = Products::find($request->id);
         if (asset('images/' . $product->image)) {
-            unlink(base_path('/storage/app/public/images/' . $product->image));
+            @unlink(base_path("public/" . $product->image));
         } else {
             return "no such file";
         }
         $product->delete();
-        return redirect("/product")->with('alert-success', 'Product deleted successfully.');
+        return redirect("/dashboard")->with('alert-success', 'Product deleted successfully.');
     }
 }

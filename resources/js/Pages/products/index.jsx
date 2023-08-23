@@ -1,28 +1,23 @@
 import React from "react";
-import { Head, usePage, Link, InertiaLink } from "@inertiajs/inertia-react";
-import { Inertia, route } from "@inertiajs/inertia";
-import { router } from "@inertiajs/react";
+import { Link } from "@inertiajs/inertia-react";
 
-function index({ products }) {
-    // const { url } = usePage();
-
-    const handleDelete = (id) => {
-        if (window.confirm("Are you sure you want to delete this product?")) {
-            // router.visit(id, { method: "delete" });
-            Inertia.delete(`/product/${id}`);
-            // Inertia.delete('product.delete');
-        }
-    };
-
+function index({ products, auth }) {
     return (
         <div className="container">
-            <Head title="Product lists" />
-            {/* <a className="btn btn-primary my-5" href={ route('product.create') }>
-                Add New Product
-            </a> */}
-            <Link className="btn btn-primary my-5" href="/product/create">
-                Create Product
-            </Link>
+            {(auth.user && (
+                <Link href={route("dashboard")} as="button" type="button">
+                    <h1 className="btn btn-primary my-3">Link to dashBoard</h1>
+                </Link>
+            )) || (
+                <div className="container">
+                    <Link href={route("dashboard")} as="button" type="button">
+                        <h1 className="btn btn-primary my-3">Login in</h1>
+                    </Link>
+                    <Link href={route("register")} as="button" type="button">
+                        <h1 className="btn btn-primary my-3 mx-2">Register</h1>
+                    </Link>
+                </div>
+            )}
             <div className="row flex-column align-items-center">
                 <table id="product_table" className="table table-striped">
                     <thead>
@@ -36,12 +31,10 @@ function index({ products }) {
                             <th>total stock</th>
                             <th>min-stock</th>
                             <th>image</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {products.map((product) => (
-                            // <li key={product.id}>{product.name}</li>
                             <tr key={product.id}>
                                 <td>{product.id}</td>
                                 <td>{product.name}</td>
@@ -52,53 +45,18 @@ function index({ products }) {
                                 <td>{product.total_stock}</td>
                                 <td>{product.minimum_stock}</td>
                                 <td>
-                                {/* <img src={ asset('storage/app/  /images/' . $product.image) } alt="Example Image" /> */}
-                                </td>
-
-                                <td>
-                                    {/* <InertiaLink
-                                        // href={route("product.index")}
-                                    /> */}
-
-                                    <a
-                                        className="p-2"
-                                        // href={ route('/product/' . product.id . '/edit') }
-                                        // onClick={() => handleEdit(product.id)}
-                                        href={"/product/edit/"+product.id}
-                                    >
-                                        <i className="fa-solid fa-pen-to-square"></i>
-                                    </a>
-
-                                    <a
-                                        className="delete-btn text-danger"
-                                        tabIndex="-1"
-                                        onClick={() => handleDelete(product.id)}
-                                        // href={url(
-                                        //     "product.destroy",
-                                        //     product.id
-                                        // )}
-                                    >
-                                        <i className="fa-solid fa-trash"></i>
-                                    </a>
-
-                                    {/* <Link href='/product/{{product.id}}' method="delete" as="button" type="button">Logout</Link> */}
+                                    <img
+                                        src={product.image}
+                                        alt="image"
+                                        style={{
+                                            height: "50px",
+                                            width: "75px",
+                                        }}
+                                    />
                                 </td>
                             </tr>
                         ))}
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>S.N</th>
-                            <th>Name</th>
-                            <th>Generic,Brand</th>
-                            <th>Cost Price(in Rs)</th>
-                            <th>Selling price(in Rs)</th>
-                            <th>total stock</th>
-                            <th>min-stock</th>
-                            <th>Description</th>
-                            <th>Action</th>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
         </div>

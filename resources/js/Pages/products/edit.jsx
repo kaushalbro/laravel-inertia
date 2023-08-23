@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { usePage } from "@inertiajs/inertia-react";
-import { Inertia } from "@inertiajs/inertia";
-import { useForm } from "@inertiajs/react";
+import React from "react";
+import { useForm, usePage, Link } from "@inertiajs/react";
+import Dashboard from "@/Components/Dashboard/Dashboard";
 
-function edit({ errors }) {
+function edit() {
     const { product } = usePage().props;
-    const [state, setState] = useState({
+
+    const { data, setData, errors, post, progress } = useForm({
         name: product.name || "",
         description: product.description || "",
         brand: product.brand || "",
@@ -16,220 +16,235 @@ function edit({ errors }) {
         image: null,
     });
 
-    const handleInputChange = (event) => {
+    const handleChange = (event) => {
         const { name, value } = event.target;
-        setState((prevProps) => ({
-            ...prevProps,
-            [name]: value,
-        }));
+        setData((prevData) => ({ ...prevData, [name]: value }));
     };
 
     const handleFileChange = (e) => {
-        setState((prevProps) => ({
-            ...prevProps,
-            ["image"]: e.target.files[0],
-        }));
+        setData("image", e.target.files[0]);
     };
-    
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        // console.log(state);
-        // console.log(setData["image"]);
-        // console.log(data, product);
-        // console.log(state);
-        Inertia.patch("/product/" + product.id,state);
-        // patch(`/product/${product.id}`, {
-        //     preserveScroll: true,
-        //     forceFormData: true,
-        //     onSuccess: () => console.log("success message", props),
-        // });
-        // post("/product/", product.id, {
-        //     onSuccess: () => {
-        //         // Redirect or do any other action on successful form submission
-        //         console.log("success product creation");
-        //     },
-        // });
-        // put('/product/'+product.id,\{
-        //     forceFormData: true,
-        //     preserveScroll: true,
-        // });
+        // return console.log(product);
+        post(route("product.update", product.id));
     };
     return (
-        <div className="container ">
-            <div className="row flex-column align-items-center">
-                <form
-                    className="col-5 g-4"
-                    onSubmit={handleSubmit}
-                    encType="multipart/form-data"
-                >
-                    <h1>Edit Product</h1>
-                    <div className="flash-message"></div>
-                    <div>
-                        <label htmlFor="name" className="form-label">
-                            Name
-                        </label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="name"
-                            name="name"
-                            value={state.name}
-                            onChange={handleInputChange}
-                        />
-                        <div>
-                            {errors.name && (
-                                <div className="error text-danger">
-                                    {errors.name}
+        <Dashboard>
+            <div className="card card-primary">
+            <Link href="/dashboard" className="btn btn-secondary w-20 my-1">Go back</Link>    
+                <div className="card-header my-0">
+                    <h3 className="card-title">Product: "{product.name}" Editing</h3>
+                </div>
+                <form onSubmit={handleSubmit} encType="multipart/form-data" >
+                    <div className="card-body row my-0">
+                        <div className="form-group col-12 my-1">
+                            <label htmlFor="name" className="form-label">
+                                Name
+                            </label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="name"
+                                name="name"
+                                value={data.name}
+                                onChange={handleChange}
+                            />
+                            <div>
+                                {errors.name && (
+                                    <div className="error text-danger">
+                                        {errors.name}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="form-group col-12 my-0">
+                            <label htmlFor="description" className="form-label">
+                                Description
+                            </label>
+                            <textarea
+                                name="description"
+                                className="form-control"
+                                id="description"
+                                rows="3"
+                                defaultValue={data.description}
+                                // value={data.name}
+                                onChange={handleChange}
+                            ></textarea>
+                        </div>
+                        {errors.description && (
+                            <div className="error text-danger">
+                                {errors.description}
+                            </div>
+                        )}
+                        <div className="form-group col-12 my-1">
+                            <label htmlFor="brand" className="form-label">
+                                Genereic, Brand
+                            </label>
+                            <input
+                                type="text"
+                                autoComplete=""
+                                className="form-control"
+                                id="brand"
+                                name="brand"
+                                value={data.brand}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        {errors.brand && (
+                            <div className="error text-danger">
+                                {errors.brand}
+                            </div>
+                        )}
+                        <div className="form-group col-3">
+                            <label htmlFor="cp" className="form-label">
+                                Cost Price (in rs)
+                            </label>
+                            <input
+                                name="cost_price"
+                                autoComplete=""
+                                type="number"
+                                className="form-control"
+                                id="cp"
+                                value={data.cost_price}
+                                placeholder="Rs 1500"
+                                onChange={handleChange}
+                            />
+                        </div>
+                        {errors.cost_price && (
+                            <div className="error text-danger">
+                                {errors.cost_price}
+                            </div>
+                        )}
+                        <div className="form-group col-3">
+                            <label htmlFor="sp" className="form-label">
+                                Selling Price (in rs)
+                            </label>
+                            <input
+                                name="selling_price"
+                                type="number"
+                                autoComplete=""
+                                className="form-control"
+                                id="sp"
+                                value={data.selling_price}
+                                placeholder="Rs 1500"
+                                onChange={handleChange}
+                            />
+                        </div>
+                        {errors.selling_price && (
+                            <div className="error text-danger">
+                                {errors.selling_price}
+                            </div>
+                        )}
+                        <div className="form-group col-3">
+                            <label htmlFor="total_stock" className="form-label">
+                                Total stock
+                            </label>
+                            <input
+                                name="total_stock"
+                                autoComplete=""
+                                type="number"
+                                className="form-control"
+                                id="total-stock"
+                                value={data.total_stock}
+                                placeholder="Rs 1500"
+                                onChange={handleChange}
+                            />
+                        </div>
+                        {errors.total_stock && (
+                            <div className="error text-danger">
+                                {errors.total_stock}
+                            </div>
+                        )}
+                        <div className="form-group col-3">
+                            <label
+                                htmlFor="minimum-stock"
+                                className="form-label"
+                            >
+                                Minimum Stock
+                            </label>
+                            <input
+                                name="minimum_stock"
+                                type="number"
+                                autoComplete=""
+                                className="form-control"
+                                id="minimum-stock"
+                                placeholder="Rs 1500"
+                                value={data.minimum_stock}
+                                onChange={handleChange}
+                            />
+                        </div>
+                        {errors.minimum_stock && (
+                            <div className="error text-danger">
+                                {errors.minimum_stock}
+                            </div>
+                        )}
+
+                        <div className="form-group col-10">
+                            <label htmlFor="exampleInputFile">
+                                Product Image
+                            </label>
+                            <div className="input-group">
+                                <div className="custom-file">
+                                    <input
+                                        type="file"
+                                        className="custom-file-input"
+                                        id="img"
+                                        name="image"
+                                        onChange={handleFileChange}
+                                    />
+                                    <label
+                                        className="custom-file-label"
+                                        htmlFor="exampleInputFile"
+                                    >
+                                        Choose product image
+                                    </label>
                                 </div>
-                            )}
-                        </div>
-                    </div>
+                                <div className="input-group-append">
+                                    <span className="input-group-text">
+                                        Upload
+                                    </span>
+                                </div>
+                                {progress && (
+                                    <progress
+                                        value={progress.percentage}
+                                        max="100"
+                                    >
+                                        {progress.percentage}%
+                                    </progress>
+                                )}
+                                
+                            </div>
+                      
 
-                    <div className="">
-                        <label htmlFor="description" className="form-label">
-                            Description
-                        </label>
-                        <textarea
-                            name="description"
-                            className="form-control"
-                            id="description"
-                            rows="3"
-                            defaultValue={state.description}
-                            // value={data.name}
-                            onChange={handleInputChange}
-                        ></textarea>
-                    </div>
-                    {errors.description && (
-                        <div className="error text-danger">
-                            {errors.description}
                         </div>
-                    )}
-                    <div className="col-md-12">
-                        <label htmlFor="brand" className="form-label">
-                            Genereic,Brand
-                        </label>
-                        <input
-                            type="text"
-                            autoComplete=""
-                            className="form-control"
-                            id="brand"
-                            name="brand"
-                            value={state.brand}
-                            onChange={handleInputChange}
-                        />
+                        <div className="col-2">
+                                <img
+                                    src={product.image}
+                                    className="w-40 h-30"
+                                    alt=""
+                                />
+                            </div>
+                        {errors && errors.image && (
+                            <div className="error text-danger">
+                                {errors.image}
+                            </div>
+                        )}
                     </div>
-                    {errors.brand && (
-                        <div className="error text-danger">{errors.brand}</div>
-                    )}
-                    <div className="col-12">
-                        <label htmlFor="cp" className="form-label">
-                            Cost Price (in rs)
-                        </label>
-                        <input
-                            name="cost_price"
-                            autoComplete=""
-                            type="number"
-                            className="form-control"
-                            id="cp"
-                            value={state.cost_price}
-                            placeholder="Rs 1500"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                    {errors.cost_price && (
-                        <div className="error text-danger">
-                            {errors.cost_price}
-                        </div>
-                    )}
-                    <div className="col-12">
-                        <label htmlFor="sp" className="form-label">
-                            Selling Price (in rs)
-                        </label>
-                        <input
-                            name="selling_price"
-                            type="number"
-                            autoComplete=""
-                            className="form-control"
-                            id="sp"
-                            value={state.selling_price}
-                            placeholder="Rs 1500"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                    {errors.selling_price && (
-                        <div className="error text-danger">
-                            {errors.selling_price}
-                        </div>
-                    )}
-                    <div className="col-12">
-                        <label htmlFor="total_stock" className="form-label">
-                            Total stock
-                        </label>
-                        <input
-                            name="total_stock"
-                            autoComplete=""
-                            type="number"
-                            className="form-control"
-                            id="total-stock"
-                            value={state.total_stock}
-                            placeholder="Rs 1500"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                    {errors.total_stock && (
-                        <div className="error text-danger">
-                            {errors.total_stock}
-                        </div>
-                    )}
-                    <div className="col-12">
-                        <label htmlFor="minimum-stock" className="form-label">
-                            Minimum Stock
-                        </label>
-                        <input
-                            name="minimum_stock"
-                            type="number"
-                            autoComplete=""
-                            className="form-control"
-                            id="minimum-stock"
-                            placeholder="Rs 1500"
-                            value={state.minimum_stock}
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                    {errors.minimum_stock && (
-                        <div className="error text-danger">
-                            {errors.minimum_stock}
-                        </div>
-                    )}
-                    <div className="mb-3">
-                        <label htmlFor="img" className="form-label">
-                            Product image
-                        </label>
-                        <input
-                            className="form-control"
-                            type="file"
-                            id="image"
-                            name="image"
-                            onChange={handleFileChange}
-                        />
-                        {/* {progress && (
-                            <progress value={progress.percentage} max="100">
-                                {progress.percentage}%
-                            </progress>
-                        )} */}
-                    </div>
-                    {errors && errors.image && (
-                        <div className="error text-danger">{errors.image}</div>
-                    )}
+                    {/* <!-- /.card-body --> */}
 
-                    <div className="col-12">
-                        <button type="submit" className="btn btn-primary">
-                            Update Product
+                    <div className="card-footer">
+                        <button
+                            type="submit"
+                            className="btn btn-primary bg-primary w-100"
+                        >
+                            Submit
                         </button>
                     </div>
                 </form>
             </div>
-        </div>
+        </Dashboard>
     );
 }
 
